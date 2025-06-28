@@ -1,0 +1,1021 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WeekPlanner - Управление задачами</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #3f37c9;
+            --success: #4cc9f0;
+            --danger: #f72585;
+            --warning: #f8961e;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --background: #ffffff;
+            --text: #333333;
+            --card-bg: #f1f5f9;
+            --border: #dee2e6;
+            --today-highlight: #ff6b6b;
+            --shadow: rgba(0, 0, 0, 0.1);
+        }
+
+        .dark-mode {
+            --primary: #4895ef;
+            --secondary: #3a0ca3;
+            --success: #4cc9f0;
+            --danger: #f72585;
+            --warning: #f8961e;
+            --light: #343a40;
+            --dark: #f8f9fa;
+            --background: #121212;
+            --text: #e0e0e0;
+            --card-bg: #1e1e1e;
+            --border: #444;
+            --today-highlight: #ff6b6b;
+            --shadow: rgba(0, 0, 0, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background);
+            color: var(--text);
+            line-height: 1.6;
+            padding: 0;
+            margin: 0;
+            min-height: 100vh;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 1rem;
+            text-align: center;
+            box-shadow: 0 4px 6px var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1rem;
+            gap: 1.5rem;
+        }
+
+        .week-navigation {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            background-color: var(--card-bg);
+            border-radius: 10px;
+            box-shadow: 0 2px 4px var(--shadow);
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn:hover {
+            background-color: var(--secondary);
+            transform: translateY(-2px);
+        }
+
+        .week-display {
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .week-days {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .day-card {
+            background-color: var(--card-bg);
+            border-radius: 10px;
+            padding: 1rem;
+            text-align: center;
+            cursor: pointer;
+            box-shadow: 0 2px 4px var(--shadow);
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .day-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px var(--shadow);
+        }
+
+        .day-card.today {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+        }
+
+        .day-card.selected {
+            border: 3px solid var(--warning);
+        }
+
+        .day-name {
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .day-date {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .progress-bar {
+            height: 5px;
+            background-color: var(--border);
+            border-radius: 10px;
+            margin-top: 0.5rem;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(to right, var(--success), var(--primary));
+            border-radius: 10px;
+        }
+
+        .content-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        @media (max-width: 992px) {
+            .content-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .tasks-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .task-section {
+            background-color: var(--card-bg);
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px var(--shadow);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--primary);
+        }
+
+        .section-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .task-list {
+            list-style: none;
+        }
+
+        .task-item {
+            background-color: var(--background);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 1px 3px var(--shadow);
+        }
+
+        .task-checkbox {
+            margin-right: 1rem;
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .task-text {
+            flex: 1;
+            font-size: 1rem;
+        }
+
+        .task-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .task-action-btn {
+            background: none;
+            border: none;
+            color: var(--primary);
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .add-task-form {
+            display: flex;
+            margin-top: 1rem;
+            gap: 0.5rem;
+        }
+
+        .task-input {
+            flex: 1;
+            padding: 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: 5px;
+            background-color: var(--background);
+            color: var(--text);
+        }
+
+        .day-details {
+            background-color: var(--card-bg);
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px var(--shadow);
+        }
+
+        .empty-day {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text);
+            opacity: 0.7;
+        }
+
+        .empty-day i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            display: block;
+            color: var(--primary);
+        }
+
+        .completed-task {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem;
+            background-color: var(--background);
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+            box-shadow: 0 1px 3px var(--shadow);
+        }
+
+        .completed-task i {
+            color: var(--success);
+            margin-right: 0.75rem;
+            font-size: 1.2rem;
+        }
+
+        .stats-container {
+            background-color: var(--card-bg);
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px var(--shadow);
+            margin-top: 1.5rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .stat-card {
+            background-color: var(--background);
+            border-radius: 10px;
+            padding: 1rem;
+            text-align: center;
+            box-shadow: 0 2px 4px var(--shadow);
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--primary);
+            margin: 0.5rem 0;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .chart-container {
+            height: 300px;
+            margin-top: 1rem;
+        }
+
+        .settings-panel {
+            position: fixed;
+            top: 0;
+            right: -400px;
+            width: 350px;
+            height: 100vh;
+            background-color: var(--card-bg);
+            box-shadow: -5px 0 15px var(--shadow);
+            padding: 1.5rem;
+            z-index: 1000;
+            transition: right 0.3s ease;
+            overflow-y: auto;
+        }
+
+        .settings-panel.open {
+            right: 0;
+        }
+
+        .settings-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--primary);
+        }
+
+        .close-settings {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--text);
+            cursor: pointer;
+        }
+
+        .setting-item {
+            margin-bottom: 1.5rem;
+        }
+
+        .setting-title {
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--primary);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+
+        .notification-options {
+            margin-top: 0.5rem;
+            padding-left: 1.5rem;
+        }
+
+        .notification-option {
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .notification-option input {
+            margin-right: 0.5rem;
+        }
+
+        .settings-btn {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            box-shadow: 0 4px 8px var(--shadow);
+            z-index: 999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            display: none;
+        }
+
+        .notification {
+            position: fixed;
+            bottom: 1rem;
+            right: 1rem;
+            padding: 1rem;
+            background-color: var(--card-bg);
+            border-left: 4px solid var(--warning);
+            border-radius: 5px;
+            box-shadow: 0 4px 6px var(--shadow);
+            display: flex;
+            align-items: center;
+            z-index: 1000;
+            max-width: 350px;
+            display: none;
+        }
+
+        .notification i {
+            font-size: 1.5rem;
+            margin-right: 1rem;
+            color: var(--warning);
+        }
+
+        .close-notification {
+            background: none;
+            border: none;
+            color: var(--text);
+            margin-left: 1rem;
+            cursor: pointer;
+        }
+
+        @media (max-width: 768px) {
+            .week-days {
+                grid-template-columns: repeat(4, 1fr);
+            }
+            
+            .day-card:nth-child(n+5) {
+                grid-column: span 2;
+            }
+            
+            .tasks-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .settings-panel {
+                width: 100%;
+                right: -100%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .week-days {
+                grid-template-columns: 1fr 1fr;
+            }
+            
+            .day-card {
+                grid-column: span 1;
+            }
+            
+            .btn {
+                padding: 0.4rem 0.8rem;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1><i class="fas fa-calendar-week"></i> WeekPlanner</h1>
+        <p>Планируйте свою неделю эффективно</p>
+    </header>
+
+    <div class="container">
+        <div class="week-navigation">
+            <button class="btn" id="prev-week"><i class="fas fa-chevron-left"></i> Предыдущая неделя</button>
+            <div class="week-display" id="week-range">23 апреля - 29 апреля 2023</div>
+            <button class="btn" id="current-week">Текущая неделя</button>
+        </div>
+
+        <div class="week-days" id="week-days">
+            <!-- Days will be populated by JavaScript -->
+        </div>
+
+        <div class="content-container">
+            <div class="tasks-container">
+                <div class="task-section">
+                    <div class="section-header">
+                        <h2 class="section-title"><i class="fas fa-sun"></i> Сегодня</h2>
+                    </div>
+                    <ul class="task-list" id="today-tasks">
+                        <li class="task-item">
+                            <input type="checkbox" class="task-checkbox">
+                            <span class="task-text">Завершить проект по веб-разработке</span>
+                            <div class="task-actions">
+                                <button class="task-action-btn"><i class="fas fa-edit"></i></button>
+                                <button class="task-action-btn"><i class="fas fa-trash"></i></button>
+                            </div>
+                        </li>
+                        <li class="task-item">
+                            <input type="checkbox" class="task-checkbox" checked>
+                            <span class="task-text">Купить продукты</span>
+                            <div class="task-actions">
+                                <button class="task-action-btn"><i class="fas fa-edit"></i></button>
+                                <button class="task-action-btn"><i class="fas fa-trash"></i></button>
+                            </div>
+                        </li>
+                    </ul>
+                    <div class="add-task-form">
+                        <input type="text" class="task-input" placeholder="Добавить задачу...">
+                        <button class="btn"><i class="fas fa-plus"></i></button>
+                    </div>
+                </div>
+
+                <div class="task-section">
+                    <div class="section-header">
+                        <h2 class="section-title"><i class="fas fa-cloud-sun"></i> Завтра</h2>
+                    </div>
+                    <ul class="task-list" id="tomorrow-tasks">
+                        <li class="task-item">
+                            <input type="checkbox" class="task-checkbox">
+                            <span class="task-text">Встреча с командой</span>
+                            <div class="task-actions">
+                                <button class="task-action-btn"><i class="fas fa-edit"></i></button>
+                                <button class="task-action-btn"><i class="fas fa-trash"></i></button>
+                            </div>
+                        </li>
+                    </ul>
+                    <div class="add-task-form">
+                        <input type="text" class="task-input" placeholder="Добавить задачу...">
+                        <button class="btn"><i class="fas fa-plus"></i></button>
+                    </div>
+                </div>
+
+                <div class="task-section">
+                    <div class="section-header">
+                        <h2 class="section-title"><i class="fas fa-calendar-week"></i> На этой неделе</h2>
+                    </div>
+                    <ul class="task-list" id="week-tasks">
+                        <li class="task-item">
+                            <input type="checkbox" class="task-checkbox">
+                            <span class="task-text">Подготовить отчет по продажам</span>
+                            <div class="task-actions">
+                                <button class="task-action-btn"><i class="fas fa-edit"></i></button>
+                                <button class="task-action-btn"><i class="fas fa-trash"></i></button>
+                            </div>
+                        </li>
+                        <li class="task-item">
+                            <input type="checkbox" class="task-checkbox">
+                            <span class="task-text">Записаться к врачу</span>
+                            <div class="task-actions">
+                                <button class="task-action-btn"><i class="fas fa-edit"></i></button>
+                                <button class="task-action-btn"><i class="fas fa-trash"></i></button>
+                            </div>
+                        </li>
+                    </ul>
+                    <div class="add-task-form">
+                        <input type="text" class="task-input" placeholder="Добавить задачу...">
+                        <button class="btn"><i class="fas fa-plus"></i></button>
+                    </div>
+                </div>
+
+                <div class="task-section">
+                    <div class="section-header">
+                        <h2 class="section-title"><i class="fas fa-calendar-plus"></i> Позже</h2>
+                    </div>
+                    <ul class="task-list" id="later-tasks">
+                        <li class="task-item">
+                            <input type="checkbox" class="task-checkbox">
+                            <span class="task-text">Планирование отпуска</span>
+                            <div class="task-actions">
+                                <button class="task-action-btn"><i class="fas fa-edit"></i></button>
+                                <button class="task-action-btn"><i class="fas fa-trash"></i></button>
+                            </div>
+                        </li>
+                        <li class="task-item">
+                            <input type="checkbox" class="task-checkbox">
+                            <span class="task-text">Обновить резюме</span>
+                            <div class="task-actions">
+                                <button class="task-action-btn"><i class="fas fa-edit"></i></button>
+                                <button class="task-action-btn"><i class="fas fa-trash"></i></button>
+                            </div>
+                        </li>
+                    </ul>
+                    <div class="add-task-form">
+                        <input type="text" class="task-input" placeholder="Добавить задачу...">
+                        <button class="btn"><i class="fas fa-plus"></i></button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="day-details">
+                <h2 class="section-header">Выполненные задачи: <span id="selected-day">Сегодня, 25 апреля</span></h2>
+                <div id="completed-tasks">
+                    <div class="completed-task">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Завершить проект по веб-разработке</span>
+                    </div>
+                    <div class="completed-task">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Купить продукты</span>
+                    </div>
+                    <div class="completed-task">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Позвонить родителям</span>
+                    </div>
+                </div>
+                <div id="empty-day" class="empty-day" style="display: none;">
+                    <i class="fas fa-star"></i>
+                    <h3>Никаких выполненных задач!</h3>
+                    <p>Сегодня отличный день, чтобы начать планировать и достигать новых целей!</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="stats-container">
+            <h2 class="section-header">Статистика продуктивности</h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value">7</div>
+                    <div class="stat-label">Задач выполнено сегодня</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">24</div>
+                    <div class="stat-label">Задач за неделю</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">75%</div>
+                    <div class="stat-label">Прогресс недели</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">86</div>
+                    <div class="stat-label">Всего выполнено задач</div>
+                </div>
+            </div>
+            <div class="chart-container">
+                <canvas id="progress-chart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <button class="settings-btn" id="settings-btn">
+        <i class="fas fa-cog"></i>
+    </button>
+
+    <div class="overlay" id="overlay"></div>
+
+    <div class="notification" id="notification">
+        <i class="fas fa-bell"></i>
+        <div class="notification-content">
+            <strong>Напоминание!</strong>
+            <p>У вас запланирована встреча через 30 минут</p>
+        </div>
+        <button class="close-notification">&times;</button>
+    </div>
+
+    <div class="settings-panel" id="settings-panel">
+        <div class="settings-header">
+            <h2>Настройки</h2>
+            <button class="close-settings">&times;</button>
+        </div>
+        
+        <div class="setting-item">
+            <span class="setting-title">Тема оформления</span>
+            <div class="theme-switch">
+                <button class="btn" id="light-theme">Светлая</button>
+                <button class="btn" id="dark-theme">Тёмная</button>
+            </div>
+        </div>
+        
+        <div class="setting-item">
+            <span class="setting-title">Уведомления</span>
+            <label class="switch">
+                <input type="checkbox" id="notifications-toggle" checked>
+                <span class="slider"></span>
+            </label>
+            
+            <div class="notification-options">
+                <div class="notification-option">
+                    <input type="checkbox" id="today-notif" checked>
+                    <label for="today-notif">Уведомления для "Сегодня"</label>
+                </div>
+                <div class="notification-option">
+                    <input type="checkbox" id="tomorrow-notif" checked>
+                    <label for="tomorrow-notif">Уведомления для "Завтра"</label>
+                </div>
+                <div class="notification-option">
+                    <input type="checkbox" id="week-notif">
+                    <label for="week-notif">Уведомления для "На этой неделе"</label>
+                </div>
+                <div class="notification-option">
+                    <input type="checkbox" id="later-notif">
+                    <label for="later-notif">Уведомления для "Позже"</label>
+                </div>
+            </div>
+        </div>
+        
+        <div class="setting-item">
+            <span class="setting-title">Звуковые оповещения</span>
+            <label class="switch">
+                <input type="checkbox" id="sounds-toggle" checked>
+                <span class="slider"></span>
+            </label>
+        </div>
+        
+        <div class="setting-item">
+            <span class="setting-title">Показывать статистику</span>
+            <label class="switch">
+                <input type="checkbox" id="stats-toggle" checked>
+                <span class="slider"></span>
+            </label>
+        </div>
+        
+        <div class="setting-item">
+            <span class="setting-title">Сбросить данные</span>
+            <button class="btn" id="reset-data">Очистить всё</button>
+            <p style="margin-top: 0.5rem; font-size: 0.9rem;">Это действие удалит все задачи и настройки</p>
+        </div>
+    </div>
+
+    <script>
+        // Инициализация приложения
+        document.addEventListener('DOMContentLoaded', function() {
+            // Генерация дней недели
+            generateWeekDays();
+            
+            // Инициализация графика
+            initChart();
+            
+            // Установка обработчиков событий
+            setupEventListeners();
+            
+            // Проверка и применение сохраненной темы
+            applySavedTheme();
+        });
+
+        // Генерация дней недели
+        function generateWeekDays() {
+            const weekDays = ['Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота', 'Воскресенье'];
+            const today = new Date();
+            const dayOfWeek = today.getDay();
+            const daysContainer = document.getElementById('week-days');
+            
+            daysContainer.innerHTML = '';
+            
+            // Рассчитываем даты для текущей недели
+            const startOfWeek = new Date(today);
+            startOfWeek.setDate(today.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1));
+            
+            for (let i = 0; i < 7; i++) {
+                const day = new Date(startOfWeek);
+                day.setDate(startOfWeek.getDate() + i);
+                
+                const dayCard = document.createElement('div');
+                dayCard.className = 'day-card';
+                if (day.toDateString() === today.toDateString()) {
+                    dayCard.classList.add('today');
+                }
+                
+                // Генерация случайного прогресса задач для демонстрации
+                const progress = Math.floor(Math.random() * 100);
+                
+                dayCard.innerHTML = `
+                    <div class="day-name">${weekDays[i]}</div>
+                    <div class="day-date">${day.getDate()} ${getMonthName(day.getMonth())}</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: ${progress}%"></div>
+                    </div>
+                `;
+                
+                dayCard.addEventListener('click', function() {
+                    document.querySelectorAll('.day-card').forEach(card => card.classList.remove('selected'));
+                    this.classList.add('selected');
+                    
+                    // Обновление деталей дня
+                    updateDayDetails(day);
+                });
+                
+                daysContainer.appendChild(dayCard);
+            }
+            
+            // Выбираем сегодняшний день по умолчанию
+            document.querySelector('.day-card.today').click();
+        }
+
+        // Обновление деталей дня
+        function updateDayDetails(date) {
+            const dayNames = ['Воскресенье', 'Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота'];
+            const dayName = dayNames[date.getDay()];
+            const dayDate = `${date.getDate()} ${getMonthName(date.getMonth())}`;
+            
+            document.getElementById('selected-day').textContent = `${dayName}, ${dayDate}`;
+            
+            // Случайное решение показывать ли задачи или пустой блок
+            const showEmpty = Math.random() > 0.5;
+            document.getElementById('completed-tasks').style.display = showEmpty ? 'none' : 'block';
+            document.getElementById('empty-day').style.display = showEmpty ? 'block' : 'none';
+        }
+
+        // Получение названия месяца
+        function getMonthName(monthIndex) {
+            const months = [
+                'января', 'февраля', 'марта', 'апреля', 'мая', 'июня',
+                'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'
+            ];
+            return months[monthIndex];
+        }
+
+        // Инициализация графика статистики
+        function initChart() {
+            const ctx = document.getElementById('progress-chart').getContext('2d');
+            
+            // Данные для демонстрации
+            const days = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
+            const completedData = [5, 7, 3, 8, 6, 4, 9];
+            const plannedData = [7, 8, 6, 9, 7, 5, 10];
+            
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: days,
+                    datasets: [
+                        {
+                            label: 'Выполнено',
+                            data: completedData,
+                            backgroundColor: '#4cc9f0',
+                            borderRadius: 5
+                        },
+                        {
+                            label: 'Запланировано',
+                            data: plannedData,
+                            backgroundColor: '#4361ee',
+                            borderRadius: 5
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.1)'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: 'var(--text)'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Установка обработчиков событий
+        function setupEventListeners() {
+            // Навигация по неделям
+            document.getElementById('prev-week').addEventListener('click', function() {
+                alert('Переход к предыдущей неделе');
+            });
+            
+            document.getElementById('current-week').addEventListener('click', function() {
+                alert('Возврат к текущей неделе');
+            });
+            
+            // Переключение тем
+            document.getElementById('light-theme').addEventListener('click', function() {
+                document.body.classList.remove('dark-mode');
+                localStorage.setItem('theme', 'light');
+            });
+            
+            document.getElementById('dark-theme').addEventListener('click', function() {
+                document.body.classList.add('dark-mode');
+                localStorage.setItem('theme', 'dark');
+            });
+            
+            // Открытие/закрытие настроек
+            document.getElementById('settings-btn').addEventListener('click', function() {
+                document.getElementById('settings-panel').classList.add('open');
+                document.getElementById('overlay').style.display = 'block';
+            });
+            
+            document.querySelector('.close-settings').addEventListener('click', function() {
+                document.getElementById('settings-panel').classList.remove('open');
+                document.getElementById('overlay').style.display = 'none';
+            });
+            
+            document.getElementById('overlay').addEventListener('click', function() {
+                document.getElementById('settings-panel').classList.remove('open');
+                this.style.display = 'none';
+            });
+            
+            // Сброс данных
+            document.getElementById('reset-data').addEventListener('click', function() {
+                if (confirm('Вы уверены, что хотите удалить все данные? Это действие нельзя отменить.')) {
+                    alert('Все данные были удалены');
+                }
+            });
+            
+            // Показать уведомление для демонстрации
+            setTimeout(() => {
+                document.getElementById('notification').style.display = 'flex';
+            }, 3000);
+            
+            document.querySelector('.close-notification').addEventListener('click', function() {
+                document.getElementById('notification').style.display = 'none';
+            });
+            
+            // Обработка добавления задач
+            document.querySelectorAll('.add-task-form .btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const input = this.previousElementSibling;
+                    if (input.value.trim() !== '') {
+                        alert(`Добавлена новая задача: "${input.value}"`);
+                        input.value = '';
+                    }
+                });
+            });
+            
+            // Обработка нажатия Enter в полях ввода
+            document.querySelectorAll('.task-input').forEach(input => {
+                input.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        this.nextElementSibling.click();
+                    }
+                });
+            });
+        }
+
+        // Применение сохраненной темы
+        function applySavedTheme() {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'dark') {
+                document.body.classList.add('dark-mode');
+            }
+        }
+    </script>
+</body>
+</html>
