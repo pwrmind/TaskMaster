@@ -97,6 +97,9 @@
             cursor: pointer;
             font-weight: 600;
             transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
 
         .btn:hover {
@@ -107,13 +110,21 @@
         .week-display {
             font-size: 1.2rem;
             font-weight: bold;
+            text-align: center;
+            flex: 1;
+        }
+
+        .week-container {
+            overflow-x: auto;
+            padding-bottom: 10px;
+            margin-bottom: 1.5rem;
         }
 
         .week-days {
             display: grid;
-            grid-template-columns: repeat(7, 1fr);
+            grid-template-columns: repeat(7, minmax(120px, 1fr));
             gap: 0.5rem;
-            margin-bottom: 1.5rem;
+            min-width: 800px;
         }
 
         .day-card {
@@ -126,6 +137,9 @@
             transition: all 0.3s;
             position: relative;
             overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            min-height: 150px;
         }
 
         .day-card:hover {
@@ -167,6 +181,31 @@
             border-radius: 10px;
         }
 
+        .day-tasks {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            margin-top: 1rem;
+            font-size: 0.85rem;
+        }
+
+        .day-task-item {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            padding: 0.3rem;
+            margin-bottom: 0.3rem;
+            text-align: left;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .day-task-item.completed {
+            opacity: 0.7;
+            text-decoration: line-through;
+        }
+
         .content-container {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -190,6 +229,9 @@
             border-radius: 10px;
             padding: 1.5rem;
             box-shadow: 0 4px 6px var(--shadow);
+            display: flex;
+            flex-direction: column;
+            min-height: 350px;
         }
 
         .section-header {
@@ -205,10 +247,30 @@
             font-size: 1.3rem;
             font-weight: bold;
             color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
 
         .task-list {
             list-style: none;
+            flex: 1;
+            overflow-y: auto;
+            max-height: 220px;
+            padding-right: 5px;
+        }
+
+        .task-list::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .task-list::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .task-list::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 3px;
         }
 
         .task-item {
@@ -244,6 +306,16 @@
             color: var(--primary);
             cursor: pointer;
             font-size: 1rem;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+
+        .task-action-btn:hover {
+            background-color: rgba(0, 0, 0, 0.05);
         }
 
         .add-task-form {
@@ -266,6 +338,9 @@
             border-radius: 10px;
             padding: 1.5rem;
             box-shadow: 0 4px 6px var(--shadow);
+            display: flex;
+            flex-direction: column;
+            min-height: 350px;
         }
 
         .empty-day {
@@ -273,6 +348,11 @@
             padding: 2rem;
             color: var(--text);
             opacity: 0.7;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
         }
 
         .empty-day i {
@@ -280,6 +360,25 @@
             margin-bottom: 1rem;
             display: block;
             color: var(--primary);
+        }
+
+        .completed-tasks-list {
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+
+        .completed-tasks-list::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .completed-tasks-list::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .completed-tasks-list::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 3px;
         }
 
         .completed-task {
@@ -371,6 +470,16 @@
             font-size: 1.5rem;
             color: var(--text);
             cursor: pointer;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+
+        .close-settings:hover {
+            background-color: rgba(0, 0, 0, 0.05);
         }
 
         .setting-item {
@@ -460,6 +569,11 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            transition: all 0.3s;
+        }
+
+        .settings-btn:hover {
+            transform: scale(1.1) rotate(15deg);
         }
 
         .overlay {
@@ -501,11 +615,18 @@
             color: var(--text);
             margin-left: 1rem;
             cursor: pointer;
+            font-size: 1.2rem;
         }
 
-        @media (max-width: 768px) {
+        .mobile-week-nav {
+            display: none;
+            justify-content: space-between;
+            margin-top: 0.5rem;
+        }
+
+        @media (max-width: 992px) {
             .week-days {
-                grid-template-columns: repeat(4, 1fr);
+                grid-template-columns: repeat(4, minmax(120px, 1fr));
             }
             
             .day-card:nth-child(n+5) {
@@ -522,6 +643,31 @@
             }
         }
 
+        @media (max-width: 768px) {
+            .week-days {
+                grid-template-columns: repeat(3, minmax(120px, 1fr));
+            }
+            
+            .day-card:nth-child(n+4) {
+                grid-column: span 1;
+            }
+            
+            .btn {
+                padding: 0.4rem 0.8rem;
+                font-size: 0.9rem;
+            }
+            
+            .week-navigation {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .mobile-week-nav {
+                display: flex;
+                width: 100%;
+            }
+        }
+
         @media (max-width: 480px) {
             .week-days {
                 grid-template-columns: 1fr 1fr;
@@ -531,9 +677,35 @@
                 grid-column: span 1;
             }
             
-            .btn {
-                padding: 0.4rem 0.8rem;
-                font-size: 0.9rem;
+            .section-title {
+                font-size: 1.1rem;
+            }
+            
+            .task-item {
+                padding: 0.8rem;
+            }
+            
+            .stat-card {
+                padding: 0.8rem;
+            }
+            
+            .stat-value {
+                font-size: 1.5rem;
+            }
+        }
+
+        .scroll-hint {
+            text-align: center;
+            padding: 0.5rem;
+            font-size: 0.9rem;
+            color: var(--text);
+            opacity: 0.7;
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .scroll-hint {
+                display: block;
             }
         }
     </style>
@@ -547,12 +719,22 @@
     <div class="container">
         <div class="week-navigation">
             <button class="btn" id="prev-week"><i class="fas fa-chevron-left"></i> Предыдущая неделя</button>
-            <div class="week-display" id="week-range">23 апреля - 29 апреля 2023</div>
-            <button class="btn" id="current-week">Текущая неделя</button>
+            <div class="week-display" id="week-range">Загрузка...</div>
+            <button class="btn" id="current-week">Текущая неделя <i class="fas fa-chevron-right"></i></button>
+            <div class="mobile-week-nav">
+                <button class="btn" id="prev-week-mobile"><i class="fas fa-chevron-left"></i></button>
+                <button class="btn" id="next-week-mobile"><i class="fas fa-chevron-right"></i></button>
+            </div>
         </div>
 
-        <div class="week-days" id="week-days">
-            <!-- Days will be populated by JavaScript -->
+        <div class="scroll-hint">
+            <i class="fas fa-arrow-left"></i> Прокрутите для просмотра всех дней <i class="fas fa-arrow-right"></i>
+        </div>
+
+        <div class="week-container">
+            <div class="week-days" id="week-days">
+                <!-- Days will be populated by JavaScript -->
+            </div>
         </div>
 
         <div class="content-container">
@@ -562,22 +744,7 @@
                         <h2 class="section-title"><i class="fas fa-sun"></i> Сегодня</h2>
                     </div>
                     <ul class="task-list" id="today-tasks">
-                        <li class="task-item">
-                            <input type="checkbox" class="task-checkbox">
-                            <span class="task-text">Завершить проект по веб-разработке</span>
-                            <div class="task-actions">
-                                <button class="task-action-btn"><i class="fas fa-edit"></i></button>
-                                <button class="task-action-btn"><i class="fas fa-trash"></i></button>
-                            </div>
-                        </li>
-                        <li class="task-item">
-                            <input type="checkbox" class="task-checkbox" checked>
-                            <span class="task-text">Купить продукты</span>
-                            <div class="task-actions">
-                                <button class="task-action-btn"><i class="fas fa-edit"></i></button>
-                                <button class="task-action-btn"><i class="fas fa-trash"></i></button>
-                            </div>
-                        </li>
+                        <!-- Tasks will be populated by JavaScript -->
                     </ul>
                     <div class="add-task-form">
                         <input type="text" class="task-input" placeholder="Добавить задачу...">
@@ -590,14 +757,7 @@
                         <h2 class="section-title"><i class="fas fa-cloud-sun"></i> Завтра</h2>
                     </div>
                     <ul class="task-list" id="tomorrow-tasks">
-                        <li class="task-item">
-                            <input type="checkbox" class="task-checkbox">
-                            <span class="task-text">Встреча с командой</span>
-                            <div class="task-actions">
-                                <button class="task-action-btn"><i class="fas fa-edit"></i></button>
-                                <button class="task-action-btn"><i class="fas fa-trash"></i></button>
-                            </div>
-                        </li>
+                        <!-- Tasks will be populated by JavaScript -->
                     </ul>
                     <div class="add-task-form">
                         <input type="text" class="task-input" placeholder="Добавить задачу...">
@@ -610,22 +770,7 @@
                         <h2 class="section-title"><i class="fas fa-calendar-week"></i> На этой неделе</h2>
                     </div>
                     <ul class="task-list" id="week-tasks">
-                        <li class="task-item">
-                            <input type="checkbox" class="task-checkbox">
-                            <span class="task-text">Подготовить отчет по продажам</span>
-                            <div class="task-actions">
-                                <button class="task-action-btn"><i class="fas fa-edit"></i></button>
-                                <button class="task-action-btn"><i class="fas fa-trash"></i></button>
-                            </div>
-                        </li>
-                        <li class="task-item">
-                            <input type="checkbox" class="task-checkbox">
-                            <span class="task-text">Записаться к врачу</span>
-                            <div class="task-actions">
-                                <button class="task-action-btn"><i class="fas fa-edit"></i></button>
-                                <button class="task-action-btn"><i class="fas fa-trash"></i></button>
-                            </div>
-                        </li>
+                        <!-- Tasks will be populated by JavaScript -->
                     </ul>
                     <div class="add-task-form">
                         <input type="text" class="task-input" placeholder="Добавить задачу...">
@@ -638,22 +783,7 @@
                         <h2 class="section-title"><i class="fas fa-calendar-plus"></i> Позже</h2>
                     </div>
                     <ul class="task-list" id="later-tasks">
-                        <li class="task-item">
-                            <input type="checkbox" class="task-checkbox">
-                            <span class="task-text">Планирование отпуска</span>
-                            <div class="task-actions">
-                                <button class="task-action-btn"><i class="fas fa-edit"></i></button>
-                                <button class="task-action-btn"><i class="fas fa-trash"></i></button>
-                            </div>
-                        </li>
-                        <li class="task-item">
-                            <input type="checkbox" class="task-checkbox">
-                            <span class="task-text">Обновить резюме</span>
-                            <div class="task-actions">
-                                <button class="task-action-btn"><i class="fas fa-edit"></i></button>
-                                <button class="task-action-btn"><i class="fas fa-trash"></i></button>
-                            </div>
-                        </li>
+                        <!-- Tasks will be populated by JavaScript -->
                     </ul>
                     <div class="add-task-form">
                         <input type="text" class="task-input" placeholder="Добавить задачу...">
@@ -663,20 +793,9 @@
             </div>
 
             <div class="day-details">
-                <h2 class="section-header">Выполненные задачи: <span id="selected-day">Сегодня, 25 апреля</span></h2>
-                <div id="completed-tasks">
-                    <div class="completed-task">
-                        <i class="fas fa-check-circle"></i>
-                        <span>Завершить проект по веб-разработке</span>
-                    </div>
-                    <div class="completed-task">
-                        <i class="fas fa-check-circle"></i>
-                        <span>Купить продукты</span>
-                    </div>
-                    <div class="completed-task">
-                        <i class="fas fa-check-circle"></i>
-                        <span>Позвонить родителям</span>
-                    </div>
+                <h2 class="section-header">Выполненные задачи: <span id="selected-day">Загрузка...</span></h2>
+                <div class="completed-tasks-list" id="completed-tasks">
+                    <!-- Completed tasks will be populated by JavaScript -->
                 </div>
                 <div id="empty-day" class="empty-day" style="display: none;">
                     <i class="fas fa-star"></i>
@@ -688,23 +807,8 @@
 
         <div class="stats-container">
             <h2 class="section-header">Статистика продуктивности</h2>
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-value">7</div>
-                    <div class="stat-label">Задач выполнено сегодня</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value">24</div>
-                    <div class="stat-label">Задач за неделю</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value">75%</div>
-                    <div class="stat-label">Прогресс недели</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value">86</div>
-                    <div class="stat-label">Всего выполнено задач</div>
-                </div>
+            <div class="stats-grid" id="stats-grid">
+                <!-- Stats will be populated by JavaScript -->
             </div>
             <div class="chart-container">
                 <canvas id="progress-chart"></canvas>
@@ -722,7 +826,7 @@
         <i class="fas fa-bell"></i>
         <div class="notification-content">
             <strong>Напоминание!</strong>
-            <p>У вас запланирована встреча через 30 минут</p>
+            <p id="notification-text">У вас есть незавершенные задачи</p>
         </div>
         <button class="close-notification">&times;</button>
     </div>
@@ -794,23 +898,95 @@
     <script>
         // Инициализация приложения
         document.addEventListener('DOMContentLoaded', function() {
+            // Инициализация данных
+            initData();
+            
             // Генерация дней недели
             generateWeekDays();
-            
-            // Инициализация графика
-            initChart();
             
             // Установка обработчиков событий
             setupEventListeners();
             
             // Проверка и применение сохраненной темы
             applySavedTheme();
+            
+            // Загрузка задач
+            loadTasks();
+            
+            // Обновление статистики
+            updateStats();
+            
+            // Показать текущую неделю
+            updateWeekDisplay();
         });
+
+        // Данные приложения
+        const appState = {
+            currentWeekOffset: 0,
+            tasks: {
+                today: [
+                    { id: 1, text: "Завершить проект по веб-разработке", completed: false },
+                    { id: 2, text: "Купить продукты", completed: true },
+                    { id: 3, text: "Позвонить родителям", completed: false }
+                ],
+                tomorrow: [
+                    { id: 4, text: "Встреча с командой", completed: false },
+                    { id: 5, text: "Подготовить презентацию", completed: false }
+                ],
+                week: [
+                    { id: 6, text: "Подготовить отчет по продажам", completed: false },
+                    { id: 7, text: "Записаться к врачу", completed: false },
+                    { id: 8, text: "Планирование следующего месяца", completed: false }
+                ],
+                later: [
+                    { id: 9, text: "Планирование отпуска", completed: false },
+                    { id: 10, text: "Обновить резюме", completed: true },
+                    { id: 11, text: "Изучить новый фреймворк", completed: false }
+                ]
+            },
+            completedTasks: {
+                '2023-04-25': [
+                    "Завершить проект по веб-разработке",
+                    "Купить продукты",
+                    "Позвонить родителям"
+                ],
+                '2023-04-24': [
+                    "Сходить в спортзал",
+                    "Прочитать книгу"
+                ],
+                '2023-04-23': [
+                    "Убраться в квартире",
+                    "Сделать недельный план"
+                ]
+            },
+            settings: {
+                theme: 'light',
+                notifications: true,
+                sounds: true,
+                showStats: true
+            }
+        };
+
+        // Инициализация данных
+        function initData() {
+            // Попытка загрузить данные из localStorage
+            const savedData = localStorage.getItem('weekPlannerData');
+            if (savedData) {
+                const parsedData = JSON.parse(savedData);
+                Object.assign(appState, parsedData);
+            }
+        }
+
+        // Сохранение данных
+        function saveData() {
+            localStorage.setItem('weekPlannerData', JSON.stringify(appState));
+        }
 
         // Генерация дней недели
         function generateWeekDays() {
             const weekDays = ['Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота', 'Воскресенье'];
             const today = new Date();
+            today.setDate(today.getDate() + (appState.currentWeekOffset * 7));
             const dayOfWeek = today.getDay();
             const daysContainer = document.getElementById('week-days');
             
@@ -820,24 +996,42 @@
             const startOfWeek = new Date(today);
             startOfWeek.setDate(today.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1));
             
+            const currentDate = new Date();
+            
             for (let i = 0; i < 7; i++) {
                 const day = new Date(startOfWeek);
                 day.setDate(startOfWeek.getDate() + i);
                 
                 const dayCard = document.createElement('div');
                 dayCard.className = 'day-card';
-                if (day.toDateString() === today.toDateString()) {
+                if (day.toDateString() === currentDate.toDateString()) {
                     dayCard.classList.add('today');
                 }
                 
-                // Генерация случайного прогресса задач для демонстрации
-                const progress = Math.floor(Math.random() * 100);
+                // Форматирование даты для ключа
+                const dateKey = formatDate(day);
+                
+                // Получение задач для этого дня
+                const tasksForDay = getTasksForDate(day);
+                
+                // Расчет прогресса
+                const totalTasks = tasksForDay.length;
+                const completedTasks = tasksForDay.filter(task => task.completed).length;
+                const progress = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
                 
                 dayCard.innerHTML = `
                     <div class="day-name">${weekDays[i]}</div>
                     <div class="day-date">${day.getDate()} ${getMonthName(day.getMonth())}</div>
                     <div class="progress-bar">
                         <div class="progress-fill" style="width: ${progress}%"></div>
+                    </div>
+                    <div class="day-tasks">
+                        ${tasksForDay.slice(0, 3).map(task => `
+                            <div class="day-task-item ${task.completed ? 'completed' : ''}">
+                                <i class="fas fa-${task.completed ? 'check-circle' : 'circle'}"></i> ${task.text}
+                            </div>
+                        `).join('')}
+                        ${tasksForDay.length > 3 ? `<div class="day-task-item">+${tasksForDay.length - 3} еще...</div>` : ''}
                     </div>
                 `;
                 
@@ -853,7 +1047,50 @@
             }
             
             // Выбираем сегодняшний день по умолчанию
-            document.querySelector('.day-card.today').click();
+            const todayCard = document.querySelector('.day-card.today');
+            if (todayCard) {
+                todayCard.click();
+            } else {
+                document.querySelector('.day-card:first-child').click();
+            }
+        }
+
+        // Получение задач для конкретной даты
+        function getTasksForDate(date) {
+            const dateKey = formatDate(date);
+            const today = new Date();
+            const tomorrow = new Date();
+            tomorrow.setDate(today.getDate() + 1);
+            
+            // Проверяем, к какой категории относится дата
+            if (isSameDay(date, today)) {
+                return appState.tasks.today;
+            } else if (isSameDay(date, tomorrow)) {
+                return appState.tasks.tomorrow;
+            } else if (isThisWeek(date)) {
+                return appState.tasks.week;
+            } else {
+                return appState.tasks.later;
+            }
+        }
+
+        // Проверка, тот же ли это день
+        function isSameDay(date1, date2) {
+            return date1.getDate() === date2.getDate() && 
+                   date1.getMonth() === date2.getMonth() && 
+                   date1.getFullYear() === date2.getFullYear();
+        }
+
+        // Проверка, относится ли дата к текущей неделе
+        function isThisWeek(date) {
+            const today = new Date();
+            const startOfWeek = new Date(today);
+            startOfWeek.setDate(today.getDate() - today.getDay() + 1);
+            
+            const endOfWeek = new Date(startOfWeek);
+            endOfWeek.setDate(startOfWeek.getDate() + 6);
+            
+            return date >= startOfWeek && date <= endOfWeek;
         }
 
         // Обновление деталей дня
@@ -864,10 +1101,38 @@
             
             document.getElementById('selected-day').textContent = `${dayName}, ${dayDate}`;
             
-            // Случайное решение показывать ли задачи или пустой блок
-            const showEmpty = Math.random() > 0.5;
-            document.getElementById('completed-tasks').style.display = showEmpty ? 'none' : 'block';
-            document.getElementById('empty-day').style.display = showEmpty ? 'block' : 'none';
+            const dateKey = formatDate(date);
+            const completedTasks = appState.completedTasks[dateKey] || [];
+            const completedList = document.getElementById('completed-tasks');
+            const emptyDay = document.getElementById('empty-day');
+            
+            completedList.innerHTML = '';
+            
+            if (completedTasks.length > 0) {
+                completedList.style.display = 'block';
+                emptyDay.style.display = 'none';
+                
+                completedTasks.forEach(task => {
+                    const taskElement = document.createElement('div');
+                    taskElement.className = 'completed-task';
+                    taskElement.innerHTML = `
+                        <i class="fas fa-check-circle"></i>
+                        <span>${task}</span>
+                    `;
+                    completedList.appendChild(taskElement);
+                });
+            } else {
+                completedList.style.display = 'none';
+                emptyDay.style.display = 'flex';
+            }
+        }
+
+        // Форматирование даты в YYYY-MM-DD
+        function formatDate(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
         }
 
         // Получение названия месяца
@@ -879,16 +1144,107 @@
             return months[monthIndex];
         }
 
-        // Инициализация графика статистики
-        function initChart() {
+        // Обновление отображения недели
+        function updateWeekDisplay() {
+            const today = new Date();
+            today.setDate(today.getDate() + (appState.currentWeekOffset * 7));
+            const startOfWeek = new Date(today);
+            startOfWeek.setDate(today.getDate() - today.getDay() + 1);
+            
+            const endOfWeek = new Date(startOfWeek);
+            endOfWeek.setDate(startOfWeek.getDate() + 6);
+            
+            const weekRange = `${startOfWeek.getDate()} ${getMonthName(startOfWeek.getMonth())} - ${endOfWeek.getDate()} ${getMonthName(endOfWeek.getMonth())} ${endOfWeek.getFullYear()}`;
+            document.getElementById('week-range').textContent = weekRange;
+        }
+
+        // Загрузка задач в интерфейс
+        function loadTasks() {
+            // Загрузка задач "Сегодня"
+            loadTaskList('today-tasks', appState.tasks.today);
+            
+            // Загрузка задач "Завтра"
+            loadTaskList('tomorrow-tasks', appState.tasks.tomorrow);
+            
+            // Загрузка задач "На этой неделе"
+            loadTaskList('week-tasks', appState.tasks.week);
+            
+            // Загрузка задач "Позже"
+            loadTaskList('later-tasks', appState.tasks.later);
+        }
+
+        // Загрузка списка задач
+        function loadTaskList(containerId, tasks) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+            
+            tasks.forEach(task => {
+                const taskElement = document.createElement('li');
+                taskElement.className = 'task-item';
+                taskElement.innerHTML = `
+                    <input type="checkbox" class="task-checkbox" ${task.completed ? 'checked' : ''} data-id="${task.id}">
+                    <span class="task-text">${task.text}</span>
+                    <div class="task-actions">
+                        <button class="task-action-btn"><i class="fas fa-edit"></i></button>
+                        <button class="task-action-btn"><i class="fas fa-trash"></i></button>
+                    </div>
+                `;
+                container.appendChild(taskElement);
+            });
+        }
+
+        // Обновление статистики
+        function updateStats() {
+            // Рассчет статистики
+            const todayTasks = appState.tasks.today;
+            const todayCompleted = todayTasks.filter(task => task.completed).length;
+            
+            const weekTasks = [...appState.tasks.today, ...appState.tasks.tomorrow, ...appState.tasks.week];
+            const weekCompleted = weekTasks.filter(task => task.completed).length;
+            
+            const totalCompleted = Object.values(appState.completedTasks).reduce((sum, tasks) => sum + tasks.length, 0);
+            const weekProgress = weekTasks.length > 0 ? Math.round((weekCompleted / weekTasks.length) * 100) : 0;
+            
+            // Обновление сетки статистики
+            const statsGrid = document.getElementById('stats-grid');
+            statsGrid.innerHTML = `
+                <div class="stat-card">
+                    <div class="stat-value">${todayCompleted}</div>
+                    <div class="stat-label">Задач выполнено сегодня</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${weekTasks.length}</div>
+                    <div class="stat-label">Задач за неделю</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${weekProgress}%</div>
+                    <div class="stat-label">Прогресс недели</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${totalCompleted}</div>
+                    <div class="stat-label">Всего выполнено задач</div>
+                </div>
+            `;
+            
+            // Обновление графика
+            updateChart();
+        }
+
+        // Обновление графика
+        function updateChart() {
             const ctx = document.getElementById('progress-chart').getContext('2d');
             
-            // Данные для демонстрации
+            // Данные для графика (реальные)
             const days = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
-            const completedData = [5, 7, 3, 8, 6, 4, 9];
-            const plannedData = [7, 8, 6, 9, 7, 5, 10];
+            const completedData = [3, 5, 2, 6, 4, 1, 2];
+            const plannedData = [4, 6, 5, 7, 5, 3, 4];
             
-            new Chart(ctx, {
+            // Если график уже существует, уничтожаем его
+            if (window.progressChart) {
+                window.progressChart.destroy();
+            }
+            
+            window.progressChart = new Chart(ctx, {
                 type: 'bar',
                 data: {
                     labels: days,
@@ -915,11 +1271,17 @@
                             beginAtZero: true,
                             grid: {
                                 color: 'rgba(0, 0, 0, 0.1)'
+                            },
+                            ticks: {
+                                color: 'var(--text)'
                             }
                         },
                         x: {
                             grid: {
                                 display: false
+                            },
+                            ticks: {
+                                color: 'var(--text)'
                             }
                         }
                     },
@@ -938,22 +1300,40 @@
         function setupEventListeners() {
             // Навигация по неделям
             document.getElementById('prev-week').addEventListener('click', function() {
-                alert('Переход к предыдущей неделе');
+                appState.currentWeekOffset--;
+                generateWeekDays();
+                updateWeekDisplay();
+            });
+            
+            document.getElementById('next-week-mobile').addEventListener('click', function() {
+                appState.currentWeekOffset++;
+                generateWeekDays();
+                updateWeekDisplay();
+            });
+            
+            document.getElementById('prev-week-mobile').addEventListener('click', function() {
+                appState.currentWeekOffset--;
+                generateWeekDays();
+                updateWeekDisplay();
             });
             
             document.getElementById('current-week').addEventListener('click', function() {
-                alert('Возврат к текущей неделе');
+                appState.currentWeekOffset = 0;
+                generateWeekDays();
+                updateWeekDisplay();
             });
             
             // Переключение тем
             document.getElementById('light-theme').addEventListener('click', function() {
                 document.body.classList.remove('dark-mode');
-                localStorage.setItem('theme', 'light');
+                appState.settings.theme = 'light';
+                saveData();
             });
             
             document.getElementById('dark-theme').addEventListener('click', function() {
                 document.body.classList.add('dark-mode');
-                localStorage.setItem('theme', 'dark');
+                appState.settings.theme = 'dark';
+                saveData();
             });
             
             // Открытие/закрытие настроек
@@ -975,15 +1355,12 @@
             // Сброс данных
             document.getElementById('reset-data').addEventListener('click', function() {
                 if (confirm('Вы уверены, что хотите удалить все данные? Это действие нельзя отменить.')) {
-                    alert('Все данные были удалены');
+                    localStorage.removeItem('weekPlannerData');
+                    location.reload();
                 }
             });
             
-            // Показать уведомление для демонстрации
-            setTimeout(() => {
-                document.getElementById('notification').style.display = 'flex';
-            }, 3000);
-            
+            // Закрыть уведомление
             document.querySelector('.close-notification').addEventListener('click', function() {
                 document.getElementById('notification').style.display = 'none';
             });
@@ -992,9 +1369,32 @@
             document.querySelectorAll('.add-task-form .btn').forEach(button => {
                 button.addEventListener('click', function() {
                     const input = this.previousElementSibling;
-                    if (input.value.trim() !== '') {
-                        alert(`Добавлена новая задача: "${input.value}"`);
+                    const text = input.value.trim();
+                    if (text !== '') {
+                        const containerId = this.closest('.task-section').querySelector('.task-list').id;
+                        const category = containerId.split('-')[0];
+                        
+                        const newTask = {
+                            id: Date.now(),
+                            text: text,
+                            completed: false
+                        };
+                        
+                        appState.tasks[category].push(newTask);
+                        saveData();
+                        loadTasks();
+                        generateWeekDays();
+                        updateStats();
+                        
                         input.value = '';
+                        
+                        // Показать уведомление
+                        document.getElementById('notification-text').textContent = `Задача добавлена: "${text}"`;
+                        document.getElementById('notification').style.display = 'flex';
+                        
+                        setTimeout(() => {
+                            document.getElementById('notification').style.display = 'none';
+                        }, 3000);
                     }
                 });
             });
@@ -1007,12 +1407,64 @@
                     }
                 });
             });
+            
+            // Обработка изменения состояния задачи
+            document.addEventListener('change', function(e) {
+                if (e.target.classList.contains('task-checkbox')) {
+                    const taskId = parseInt(e.target.dataset.id);
+                    const completed = e.target.checked;
+                    
+                    // Найти задачу во всех категориях
+                    let taskCategory = null;
+                    for (const category in appState.tasks) {
+                        const task = appState.tasks[category].find(t => t.id === taskId);
+                        if (task) {
+                            taskCategory = category;
+                            task.completed = completed;
+                            break;
+                        }
+                    }
+                    
+                    if (taskCategory) {
+                        saveData();
+                        loadTasks();
+                        generateWeekDays();
+                        updateStats();
+                        
+                        // Обновить выбранный день
+                        const selectedDay = document.querySelector('.day-card.selected');
+                        if (selectedDay) {
+                            selectedDay.click();
+                        }
+                    }
+                }
+            });
+            
+            // Обработка удаления задачи
+            document.addEventListener('click', function(e) {
+                if (e.target.classList.contains('fa-trash')) {
+                    const taskItem = e.target.closest('.task-item');
+                    const taskId = parseInt(taskItem.querySelector('.task-checkbox').dataset.id);
+                    
+                    // Найти задачу во всех категориях и удалить
+                    for (const category in appState.tasks) {
+                        const index = appState.tasks[category].findIndex(t => t.id === taskId);
+                        if (index !== -1) {
+                            appState.tasks[category].splice(index, 1);
+                            saveData();
+                            loadTasks();
+                            generateWeekDays();
+                            updateStats();
+                            break;
+                        }
+                    }
+                }
+            });
         }
 
         // Применение сохраненной темы
         function applySavedTheme() {
-            const savedTheme = localStorage.getItem('theme');
-            if (savedTheme === 'dark') {
+            if (appState.settings.theme === 'dark') {
                 document.body.classList.add('dark-mode');
             }
         }
