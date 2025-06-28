@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WeekPlanner - Управление задачами</title>
+    <title>WeekPlanner - Управление задачами с трекингом времени</title>
     <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -23,6 +23,7 @@
             --border: #dee2e6;
             --today-highlight: #ff6b6b;
             --shadow: rgba(0, 0, 0, 0.1);
+            --tracking: #9d4edd;
         }
 
         .dark-mode {
@@ -39,6 +40,7 @@
             --border: #444;
             --today-highlight: #ff6b6b;
             --shadow: rgba(0, 0, 0, 0.3);
+            --tracking: #c77dff;
         }
 
         * {
@@ -105,6 +107,14 @@
         .btn:hover {
             background-color: var(--secondary);
             transform: translateY(-2px);
+        }
+
+        .tracking-btn {
+            background-color: var(--tracking);
+        }
+
+        .tracking-btn:hover {
+            background-color: #7b2cbf;
         }
 
         .week-display {
@@ -199,11 +209,32 @@
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .day-task-time {
+            font-size: 0.7rem;
+            opacity: 0.8;
+            background: rgba(0,0,0,0.2);
+            padding: 0.1rem 0.3rem;
+            border-radius: 3px;
         }
 
         .day-task-item.completed {
             opacity: 0.7;
             text-decoration: line-through;
+        }
+
+        .day-time-total {
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+            font-weight: bold;
+            padding: 0.3rem;
+            background: rgba(255,255,255,0.2);
+            border-radius: 5px;
+            text-align: center;
         }
 
         .content-container {
@@ -279,8 +310,19 @@
             padding: 1rem;
             margin-bottom: 0.75rem;
             display: flex;
-            align-items: center;
+            flex-direction: column;
             box-shadow: 0 1px 3px var(--shadow);
+        }
+
+        .task-item.tracking {
+            background: linear-gradient(135deg, var(--tracking), #7b2cbf);
+            color: white;
+        }
+
+        .task-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.5rem;
         }
 
         .task-checkbox {
@@ -293,11 +335,28 @@
         .task-text {
             flex: 1;
             font-size: 1rem;
+            font-weight: 500;
+        }
+
+        .task-time {
+            font-size: 0.9rem;
+            background: rgba(0,0,0,0.1);
+            padding: 0.2rem 0.5rem;
+            border-radius: 20px;
+            font-family: monospace;
+        }
+
+        .task-tracking {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            font-weight: bold;
         }
 
         .task-actions {
             display: flex;
             gap: 0.5rem;
+            margin-top: 0.5rem;
+            justify-content: flex-end;
         }
 
         .task-action-btn {
@@ -312,6 +371,10 @@
             align-items: center;
             justify-content: center;
             border-radius: 50%;
+        }
+
+        .task-item.tracking .task-action-btn {
+            color: white;
         }
 
         .task-action-btn:hover {
@@ -389,11 +452,31 @@
             border-radius: 8px;
             margin-bottom: 0.5rem;
             box-shadow: 0 1px 3px var(--shadow);
+            justify-content: space-between;
         }
 
         .completed-task i {
             color: var(--success);
             margin-right: 0.75rem;
+            font-size: 1.2rem;
+        }
+
+        .completed-task-time {
+            font-size: 0.9rem;
+            background: rgba(0,0,0,0.1);
+            padding: 0.2rem 0.5rem;
+            border-radius: 20px;
+            font-family: monospace;
+        }
+
+        .day-time-summary {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: var(--primary);
+            color: white;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: bold;
             font-size: 1.2rem;
         }
 
@@ -712,8 +795,8 @@
 </head>
 <body>
     <header>
-        <h1><i class="fas fa-calendar-week"></i> WeekPlanner</h1>
-        <p>Планируйте свою неделю эффективно</p>
+        <h1><i class="fas fa-calendar-week"></i> WeekPlanner <small>+ Time Tracking</small></h1>
+        <p>Планируйте свою неделю и отслеживайте время работы</p>
     </header>
 
     <div class="container">
@@ -742,6 +825,7 @@
                 <div class="task-section">
                     <div class="section-header">
                         <h2 class="section-title"><i class="fas fa-sun"></i> Сегодня</h2>
+                        <div class="task-time" id="today-total-time">00:00:00</div>
                     </div>
                     <ul class="task-list" id="today-tasks">
                         <!-- Tasks will be populated by JavaScript -->
@@ -755,6 +839,7 @@
                 <div class="task-section">
                     <div class="section-header">
                         <h2 class="section-title"><i class="fas fa-cloud-sun"></i> Завтра</h2>
+                        <div class="task-time" id="tomorrow-total-time">00:00:00</div>
                     </div>
                     <ul class="task-list" id="tomorrow-tasks">
                         <!-- Tasks will be populated by JavaScript -->
@@ -768,6 +853,7 @@
                 <div class="task-section">
                     <div class="section-header">
                         <h2 class="section-title"><i class="fas fa-calendar-week"></i> На этой неделе</h2>
+                        <div class="task-time" id="week-total-time">00:00:00</div>
                     </div>
                     <ul class="task-list" id="week-tasks">
                         <!-- Tasks will be populated by JavaScript -->
@@ -781,6 +867,7 @@
                 <div class="task-section">
                     <div class="section-header">
                         <h2 class="section-title"><i class="fas fa-calendar-plus"></i> Позже</h2>
+                        <div class="task-time" id="later-total-time">00:00:00</div>
                     </div>
                     <ul class="task-list" id="later-tasks">
                         <!-- Tasks will be populated by JavaScript -->
@@ -801,6 +888,9 @@
                     <i class="fas fa-star"></i>
                     <h3>Никаких выполненных задач!</h3>
                     <p>Сегодня отличный день, чтобы начать планировать и достигать новых целей!</p>
+                </div>
+                <div class="day-time-summary" id="day-time-summary">
+                    Общее время: 00:00:00
                 </div>
             </div>
         </div>
@@ -918,45 +1008,49 @@
             
             // Показать текущую неделю
             updateWeekDisplay();
+            
+            // Обновление времени каждую секунду
+            setInterval(updateTrackingTimes, 1000);
         });
 
         // Данные приложения
         const appState = {
             currentWeekOffset: 0,
+            activeTimer: null, // ID активного таймера
             tasks: {
                 today: [
-                    { id: 1, text: "Завершить проект по веб-разработке", completed: false },
-                    { id: 2, text: "Купить продукты", completed: true },
-                    { id: 3, text: "Позвонить родителям", completed: false }
+                    { id: 1, text: "Завершить проект по веб-разработке", completed: false, timeSpent: 0, tracking: false },
+                    { id: 2, text: "Купить продукты", completed: true, timeSpent: 900, tracking: false },
+                    { id: 3, text: "Позвонить родителям", completed: false, timeSpent: 0, tracking: false }
                 ],
                 tomorrow: [
-                    { id: 4, text: "Встреча с командой", completed: false },
-                    { id: 5, text: "Подготовить презентацию", completed: false }
+                    { id: 4, text: "Встреча с командой", completed: false, timeSpent: 0, tracking: false },
+                    { id: 5, text: "Подготовить презентацию", completed: false, timeSpent: 1800, tracking: false }
                 ],
                 week: [
-                    { id: 6, text: "Подготовить отчет по продажам", completed: false },
-                    { id: 7, text: "Записаться к врачу", completed: false },
-                    { id: 8, text: "Планирование следующего месяца", completed: false }
+                    { id: 6, text: "Подготовить отчет по продажам", completed: false, timeSpent: 0, tracking: false },
+                    { id: 7, text: "Записаться к врачу", completed: false, timeSpent: 600, tracking: false },
+                    { id: 8, text: "Планирование следующего месяца", completed: false, timeSpent: 2700, tracking: false }
                 ],
                 later: [
-                    { id: 9, text: "Планирование отпуска", completed: false },
-                    { id: 10, text: "Обновить резюме", completed: true },
-                    { id: 11, text: "Изучить новый фреймворк", completed: false }
+                    { id: 9, text: "Планирование отпуска", completed: false, timeSpent: 0, tracking: false },
+                    { id: 10, text: "Обновить резюме", completed: true, timeSpent: 3600, tracking: false },
+                    { id: 11, text: "Изучить новый фреймворк", completed: false, timeSpent: 7200, tracking: false }
                 ]
             },
             completedTasks: {
                 '2023-04-25': [
-                    "Завершить проект по веб-разработке",
-                    "Купить продукты",
-                    "Позвонить родителям"
+                    { text: "Завершить проект по веб-разработке", time: 7200 },
+                    { text: "Купить продукты", time: 1800 },
+                    { text: "Позвонить родителям", time: 1200 }
                 ],
                 '2023-04-24': [
-                    "Сходить в спортзал",
-                    "Прочитать книгу"
+                    { text: "Сходить в спортзал", time: 5400 },
+                    { text: "Прочитать книгу", time: 3600 }
                 ],
                 '2023-04-23': [
-                    "Убраться в квартире",
-                    "Сделать недельный план"
+                    { text: "Убраться в квартире", time: 3600 },
+                    { text: "Сделать недельный план", time: 1800 }
                 ]
             },
             settings: {
@@ -966,6 +1060,19 @@
                 showStats: true
             }
         };
+
+        // Форматирование времени в HH:MM:SS
+        function formatTime(seconds) {
+            const hrs = Math.floor(seconds / 3600);
+            const mins = Math.floor((seconds % 3600) / 60);
+            const secs = seconds % 60;
+            
+            return [
+                hrs.toString().padStart(2, '0'),
+                mins.toString().padStart(2, '0'),
+                secs.toString().padStart(2, '0')
+            ].join(':');
+        }
 
         // Инициализация данных
         function initData() {
@@ -1019,6 +1126,9 @@
                 const completedTasks = tasksForDay.filter(task => task.completed).length;
                 const progress = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
                 
+                // Расчет общего времени для дня
+                const totalTime = tasksForDay.reduce((sum, task) => sum + task.timeSpent, 0);
+                
                 dayCard.innerHTML = `
                     <div class="day-name">${weekDays[i]}</div>
                     <div class="day-date">${day.getDate()} ${getMonthName(day.getMonth())}</div>
@@ -1028,11 +1138,13 @@
                     <div class="day-tasks">
                         ${tasksForDay.slice(0, 3).map(task => `
                             <div class="day-task-item ${task.completed ? 'completed' : ''}">
-                                <i class="fas fa-${task.completed ? 'check-circle' : 'circle'}"></i> ${task.text}
+                                <span><i class="fas fa-${task.completed ? 'check-circle' : 'circle'}"></i> ${task.text}</span>
+                                <span class="day-task-time">${formatTime(task.timeSpent)}</span>
                             </div>
                         `).join('')}
                         ${tasksForDay.length > 3 ? `<div class="day-task-item">+${tasksForDay.length - 3} еще...</div>` : ''}
                     </div>
+                    <div class="day-time-total">${formatTime(totalTime)}</div>
                 `;
                 
                 dayCard.addEventListener('click', function() {
@@ -1105,19 +1217,27 @@
             const completedTasks = appState.completedTasks[dateKey] || [];
             const completedList = document.getElementById('completed-tasks');
             const emptyDay = document.getElementById('empty-day');
+            const timeSummary = document.getElementById('day-time-summary');
             
             completedList.innerHTML = '';
+            
+            let totalTime = 0;
             
             if (completedTasks.length > 0) {
                 completedList.style.display = 'block';
                 emptyDay.style.display = 'none';
                 
                 completedTasks.forEach(task => {
+                    totalTime += task.time;
+                    
                     const taskElement = document.createElement('div');
                     taskElement.className = 'completed-task';
                     taskElement.innerHTML = `
-                        <i class="fas fa-check-circle"></i>
-                        <span>${task}</span>
+                        <div>
+                            <i class="fas fa-check-circle"></i>
+                            <span>${task.text}</span>
+                        </div>
+                        <span class="completed-task-time">${formatTime(task.time)}</span>
                     `;
                     completedList.appendChild(taskElement);
                 });
@@ -1125,6 +1245,8 @@
                 completedList.style.display = 'none';
                 emptyDay.style.display = 'flex';
             }
+            
+            timeSummary.textContent = `Общее время: ${formatTime(totalTime)}`;
         }
 
         // Форматирование даты в YYYY-MM-DD
@@ -1161,36 +1283,80 @@
         // Загрузка задач в интерфейс
         function loadTasks() {
             // Загрузка задач "Сегодня"
-            loadTaskList('today-tasks', appState.tasks.today);
+            loadTaskList('today-tasks', appState.tasks.today, 'today-total-time');
             
             // Загрузка задач "Завтра"
-            loadTaskList('tomorrow-tasks', appState.tasks.tomorrow);
+            loadTaskList('tomorrow-tasks', appState.tasks.tomorrow, 'tomorrow-total-time');
             
             // Загрузка задач "На этой неделе"
-            loadTaskList('week-tasks', appState.tasks.week);
+            loadTaskList('week-tasks', appState.tasks.week, 'week-total-time');
             
             // Загрузка задач "Позже"
-            loadTaskList('later-tasks', appState.tasks.later);
+            loadTaskList('later-tasks', appState.tasks.later, 'later-total-time');
         }
 
         // Загрузка списка задач
-        function loadTaskList(containerId, tasks) {
+        function loadTaskList(containerId, tasks, totalTimeId) {
             const container = document.getElementById(containerId);
             container.innerHTML = '';
             
+            let totalTime = 0;
+            
             tasks.forEach(task => {
+                totalTime += task.timeSpent;
+                
                 const taskElement = document.createElement('li');
-                taskElement.className = 'task-item';
+                taskElement.className = `task-item ${task.tracking ? 'tracking' : ''}`;
                 taskElement.innerHTML = `
-                    <input type="checkbox" class="task-checkbox" ${task.completed ? 'checked' : ''} data-id="${task.id}">
-                    <span class="task-text">${task.text}</span>
+                    <div class="task-header">
+                        <input type="checkbox" class="task-checkbox" ${task.completed ? 'checked' : ''} data-id="${task.id}">
+                        <span class="task-text">${task.text}</span>
+                        <span class="task-time ${task.tracking ? 'task-tracking' : ''}">${formatTime(task.timeSpent)}</span>
+                    </div>
                     <div class="task-actions">
+                        <button class="task-action-btn tracking-btn" data-id="${task.id}">
+                            <i class="fas fa-${task.tracking ? 'stop' : 'play'}"></i>
+                        </button>
                         <button class="task-action-btn"><i class="fas fa-edit"></i></button>
                         <button class="task-action-btn"><i class="fas fa-trash"></i></button>
                     </div>
                 `;
                 container.appendChild(taskElement);
             });
+            
+            document.getElementById(totalTimeId).textContent = formatTime(totalTime);
+        }
+
+        // Обновление времени трекинга
+        function updateTrackingTimes() {
+            const now = Math.floor(Date.now() / 1000);
+            
+            // Обновление времени для активной задачи
+            if (appState.activeTimer) {
+                const activeTask = findTaskById(appState.activeTimer);
+                if (activeTask) {
+                    activeTask.timeSpent = (activeTask.timeSpent || 0) + 1;
+                    saveData();
+                }
+            }
+            
+            // Обновление интерфейса
+            loadTasks();
+            
+            // Обновление выбранного дня
+            const selectedDay = document.querySelector('.day-card.selected');
+            if (selectedDay) {
+                selectedDay.click();
+            }
+        }
+
+        // Поиск задачи по ID
+        function findTaskById(taskId) {
+            for (const category in appState.tasks) {
+                const task = appState.tasks[category].find(t => t.id === taskId);
+                if (task) return task;
+            }
+            return null;
         }
 
         // Обновление статистики
@@ -1205,6 +1371,9 @@
             const totalCompleted = Object.values(appState.completedTasks).reduce((sum, tasks) => sum + tasks.length, 0);
             const weekProgress = weekTasks.length > 0 ? Math.round((weekCompleted / weekTasks.length) * 100) : 0;
             
+            // Общее время за неделю
+            const weekTime = weekTasks.reduce((sum, task) => sum + task.timeSpent, 0);
+            
             // Обновление сетки статистики
             const statsGrid = document.getElementById('stats-grid');
             statsGrid.innerHTML = `
@@ -1217,12 +1386,12 @@
                     <div class="stat-label">Задач за неделю</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-value">${weekProgress}%</div>
-                    <div class="stat-label">Прогресс недели</div>
+                    <div class="stat-value">${formatTime(weekTime)}</div>
+                    <div class="stat-label">Времени за неделю</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-value">${totalCompleted}</div>
-                    <div class="stat-label">Всего выполнено задач</div>
+                    <div class="stat-value">${weekProgress}%</div>
+                    <div class="stat-label">Прогресс недели</div>
                 </div>
             `;
             
@@ -1236,8 +1405,7 @@
             
             // Данные для графика (реальные)
             const days = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
-            const completedData = [3, 5, 2, 6, 4, 1, 2];
-            const plannedData = [4, 6, 5, 7, 5, 3, 4];
+            const timeData = [3600, 7200, 5400, 10800, 9000, 1800, 3600];
             
             // Если график уже существует, уничтожаем его
             if (window.progressChart) {
@@ -1250,15 +1418,9 @@
                     labels: days,
                     datasets: [
                         {
-                            label: 'Выполнено',
-                            data: completedData,
-                            backgroundColor: '#4cc9f0',
-                            borderRadius: 5
-                        },
-                        {
-                            label: 'Запланировано',
-                            data: plannedData,
-                            backgroundColor: '#4361ee',
+                            label: 'Время (часы)',
+                            data: timeData.map(sec => (sec / 3600).toFixed(1)),
+                            backgroundColor: '#9d4edd',
                             borderRadius: 5
                         }
                     ]
@@ -1273,6 +1435,11 @@
                                 color: 'rgba(0, 0, 0, 0.1)'
                             },
                             ticks: {
+                                color: 'var(--text)'
+                            },
+                            title: {
+                                display: true,
+                                text: 'Часы',
                                 color: 'var(--text)'
                             }
                         },
@@ -1289,6 +1456,13 @@
                         legend: {
                             labels: {
                                 color: 'var(--text)'
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `Время: ${formatTime(timeData[context.dataIndex])}`;
+                                }
                             }
                         }
                     }
@@ -1377,7 +1551,9 @@
                         const newTask = {
                             id: Date.now(),
                             text: text,
-                            completed: false
+                            completed: false,
+                            timeSpent: 0,
+                            tracking: false
                         };
                         
                         appState.tasks[category].push(newTask);
@@ -1421,6 +1597,14 @@
                         if (task) {
                             taskCategory = category;
                             task.completed = completed;
+                            
+                            // Если задача завершена, остановить трекинг
+                            if (completed && task.tracking) {
+                                task.tracking = false;
+                                if (appState.activeTimer === taskId) {
+                                    appState.activeTimer = null;
+                                }
+                            }
                             break;
                         }
                     }
@@ -1450,6 +1634,14 @@
                     for (const category in appState.tasks) {
                         const index = appState.tasks[category].findIndex(t => t.id === taskId);
                         if (index !== -1) {
+                            // Если задача активна, остановить трекинг
+                            if (appState.tasks[category][index].tracking) {
+                                appState.tasks[category][index].tracking = false;
+                                if (appState.activeTimer === taskId) {
+                                    appState.activeTimer = null;
+                                }
+                            }
+                            
                             appState.tasks[category].splice(index, 1);
                             saveData();
                             loadTasks();
@@ -1457,6 +1649,50 @@
                             updateStats();
                             break;
                         }
+                    }
+                }
+            });
+            
+            // Обработка трекинга времени
+            document.addEventListener('click', function(e) {
+                if (e.target.closest('.tracking-btn')) {
+                    const btn = e.target.closest('.tracking-btn');
+                    const taskId = parseInt(btn.dataset.id);
+                    const task = findTaskById(taskId);
+                    
+                    if (task) {
+                        // Если таймер уже активен для этой задачи - остановить
+                        if (task.tracking) {
+                            task.tracking = false;
+                            if (appState.activeTimer === taskId) {
+                                appState.activeTimer = null;
+                            }
+                        } 
+                        // Если таймер не активен - запустить
+                        else {
+                            // Остановить любой активный таймер
+                            if (appState.activeTimer) {
+                                const activeTask = findTaskById(appState.activeTimer);
+                                if (activeTask) {
+                                    activeTask.tracking = false;
+                                }
+                            }
+                            
+                            task.tracking = true;
+                            appState.activeTimer = taskId;
+                        }
+                        
+                        saveData();
+                        loadTasks();
+                        
+                        // Показать уведомление
+                        document.getElementById('notification-text').textContent = 
+                            task.tracking ? `Таймер запущен: "${task.text}"` : `Таймер остановлен: "${task.text}"`;
+                        document.getElementById('notification').style.display = 'flex';
+                        
+                        setTimeout(() => {
+                            document.getElementById('notification').style.display = 'none';
+                        }, 3000);
                     }
                 }
             });
